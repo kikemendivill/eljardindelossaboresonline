@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>El Jardín de los Sabores</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    h2, h3 {
+      text-align: left;
+      color: #2d6a4f;
+      margin-top: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    input[type="number"] {
+      width: 60px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      accent-color: green;
+      width: 18px;
+      height: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    .payment-options input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 5px;
+      width: 250px;
+    }
+
+    .bank-details {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px solid #aaa;
+      background-color: #eef;
+      display: none;
+      width: fit-content;
+    }
+
+    .envio {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bienvenido a El Jardín de los Sabores</h1>
+
+  <h2>- Acceso de compra -</h2>
+  <h3>Selecciona tu producto</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio Actual <br>(18/10/2025)</th>
+        <th>Cantidad (kg)</th>
+        <th>Suma ($)</th>
+      </tr>
+    </thead>
+    <tbody id="productTable">
+      <!-- Productos con JS -->
+    </tbody>
+  </table>
+
+  <div class="total" id="totalDisplay">Suma total: $0</div>
+
+  <h3>Detalles de envío y pago</h3>
+  <div class="form-group">
+    <label>Nombre: <input type="text" id="nombre"></label>
+  </div>
+  <div class="form-group">
+    <label>Domicilio: <input type="text" id="domicilio"></label>
+  </div>
+  <div class="form-group">
+    <label>Código postal: <input type="text" id="cp"></label>
+  </div>
+
+  <div class="envio" id="envioCosto">Costo de envío: $0</div>
+
+  <h3>Método de pago</h3>
+  <div class="payment-options">
+    <label><input type="checkbox" id="transferencia"> Transferencia</label><br>
+    <label><input type="checkbox" id="cheque"> Cheque</label>
+  </div>
+
+  <div class="bank-details" id="bankDetails">
+    <p><strong>Número de cuenta:</strong> 4785 1023 9865 2147</p>
+    <p><strong>Beneficiario:</strong> Cristian</p>
+    <p><strong>Banco:</strong> Banco Azteca</p>
+  </div>
+
+  <script>
+    // Productos
+    const productos = [
+      { nombre: "Jitomate", precio: 15 },
+      { nombre: "Cebolla", precio: 14 },
+      { nombre: "Lechuga", precio: 17 },
+      { nombre: "Cilantro", precio: 11 },
+      { nombre: "Brócoli", precio: 16 },
+      { nombre: "Repollo", precio: 15 },
+      { nombre: "Apio", precio: 14 }
+    ];
+
+    const tabla = document.getElementById('productTable');
+
+    productos.forEach((producto, index) => {
+      const row = document.createElement('tr');
+
+      const nameCell = document.createElement('td');
+      nameCell.textContent = producto.nombre;
+      row.appendChild(nameCell);
+
+      const priceCell = document.createElement('td');
+      priceCell.textContent = `$${producto.precio}`;
+      row.appendChild(priceCell);
+
+      const cantidadCell = document.createElement('td');
+      const label = document.createElement('label');
+      label.classList.add('checkbox-label');
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `check-${index}`;
+
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = 0;
+      input.id = `input-${index}`;
+      input.disabled = true;
+
+      checkbox.addEventListener('change', () => {
+        input.disabled = !checkbox.checked;
+        if (!checkbox.checked) {
+          input.value = '';
+        }
+        actualizarTotal();
+      });
+
+      input.addEventListener('input', () => {
+        actualizarTotal();
+      });
+
+      label.appendChild(checkbox);
+      label.appendChild(input);
+      cantidadCell.appendChild(label);
+      row.appendChild(cantidadCell);
+
+      const sumaCell = document.createElement('td');
+      sumaCell.id = `suma-${index}`;
+      sumaCell.textContent = "$0";
+      row.appendChild(sumaCell);
+
+      tabla.appendChild(row);
+    });
+
+    function actualizarTotal() {
+      let total = 0;
+
+      productos.forEach((producto, index) => {
+        const check = document.getElementById(`check-${index}`);
+        const input = document.getElementById(`input-${index}`);
+        const sumaCell = document.getElementById(`suma-${index}`);
+
+        if (check.checked && input.value) {
+          const cantidad = parseFloat(input.value);
+          const suma = cantidad * producto.precio;
+          sumaCell.textContent = `$${suma.toFixed(2)}`;
+          total += suma;
+        } else {
+          sumaCell.textContent = "$0";
+        }
+      });
+
+      document.getElementById('totalDisplay').textContent = `Suma total: $${total.toFixed(2)}`;
+    }
+
+    // Mostrar datos bancarios si se marca "Transferencia"
+    document.getElementById('transferencia').addEventListener('change', function () {
+      const bankDetails = document.getElementById('bankDetails');
+      bankDetails.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Generar costo de envío aleatorio entre $200 y $500
+    window.onload = function () {
+      const envio = Math.floor(Math.random() * (500 - 200 + 1)) + 200;
+      document.getElementById('envioCosto').textContent = `Costo de envío: $${envio}`;
+    }
+  </script>
+
+</body>
+</html>
